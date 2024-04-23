@@ -15,6 +15,7 @@ export default class CollectingStarsScene extends Phaser.Scene {
     this.cursor = undefined;
     this.scoreText = undefined;
     this.score = 0;
+    this.bombs = undefined;
   }
 
   preload() {
@@ -83,6 +84,20 @@ export default class CollectingStarsScene extends Phaser.Scene {
       fontSize: "32px",
       fill: "yellow",
     });
+    this.bombs = this.physics.add.group({
+      key: "bomb",
+      repeat: 5,
+      setXY: {
+        x: 30,
+        y: 0,
+        stepX: 120,
+      },
+    });
+    this.physics.add.collider(this.bombs, this.platforms);
+    this.bombs.children.iterate(function (child) {
+      child.setBounceY(0.1);
+    });
+    this.physics.add.overlap(this.player, this.bombs, this.hitBomb, null, this);
   }
 
   update() {
@@ -107,18 +122,32 @@ export default class CollectingStarsScene extends Phaser.Scene {
       this.player.setVelocity(0, -200);
       this.player.anims.play("turn");
     }
-    if (this.score >= 100) {
-      this.physics.pause();
-      this.add.text(300, 300, "You Win!!", {
-        fontSize: "48px",
-        fill: "yellow",
-      });
-    }
   }
 
   collectStar(player, star) {
     star.destroy();
     this.score += 10;
     this.scoreText.setText(`Score : ${this.score}`);
+    if (this.score >= 100) {
+      this.gameOver({
+        message: "You Win!!",
+        size: "32px",
+        color: "yellow",
+      });
+    }
+  }
+  hitBomb(player, bomb) {
+    this.gameOver({
+      message: "You Lose!!",
+      size: "32px",
+      color: "red",
+    });
+  }
+  gameOver(text) {
+    this.physics.pause();
+    this.add.text(300, 300, text.message, {
+      fontSize: text.size,
+      fill: text.color,
+    });
   }
 }
