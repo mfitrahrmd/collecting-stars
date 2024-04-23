@@ -12,6 +12,9 @@ export default class CollectingStarsScene extends Phaser.Scene {
   init() {
     this.platforms = [];
     this.stars = undefined;
+    this.cursor = undefined;
+    this.scoreText = undefined;
+    this.score = 0;
   }
 
   preload() {
@@ -48,7 +51,74 @@ export default class CollectingStarsScene extends Phaser.Scene {
     this.stars.children.iterate(function (child) {
       child.setBounceY(0.5);
     });
+    this.cursor = this.input.keyboard.createCursorKeys();
+    //animation to the left
+    this.anims.create({
+      key: "left", //--->nama animasi
+      frames: this.anims.generateFrameNumbers("dude", { start: 0, end: 3 }), //--->frame yang digunakan
+      frameRate: 10, //--->kecepatan berpindah antar frame
+      repeat: -1, //--->mengulangi animasi terus menerus
+    });
+    //animation idle
+    this.anims.create({
+      key: "turn",
+      frames: [{ key: "dude", frame: 4 }],
+      frameRate: 20,
+    });
+    //animation to the right
+    this.anims.create({
+      key: "right",
+      frames: this.anims.generateFrameNumbers("dude", { start: 5, end: 8 }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    this.physics.add.overlap(
+      this.player,
+      this.stars,
+      this.collectStar,
+      null,
+      this
+    );
+    this.scoreText = this.add.text(16, 16, `Score : ${this.score}`, {
+      fontSize: "32px",
+      fill: "yellow",
+    });
   }
 
-  update() {}
+  update() {
+    if (this.cursor.left.isDown) {
+      //Jika keyboard panah kiri ditekan
+      this.player.setVelocity(-200, 200);
+      //Kecepatan x : -200
+      //Kecepatan y : 200
+      //(bergerak ke kiri dan turun kebawah seolah terkena gaya gravitasi)
+      this.player.anims.play("left", true);
+    } else if (this.cursor.right.isDown) {
+      this.player.setVelocity(200, 200);
+      this.player.anims.play("right", true);
+      //Memanggil nama animasi.True artinya animasi forever looping
+    } else {
+      this.player.setVelocity(0, 100);
+      this.player.anims.play("turn");
+    }
+    /* Kecepatan X = 0
+    kecepatan y = -200*/
+    if (this.cursor.up.isDown) {
+      this.player.setVelocity(0, -200);
+      this.player.anims.play("turn");
+    }
+    if (this.score >= 100) {
+      this.physics.pause();
+      this.add.text(300, 300, "You Win!!", {
+        fontSize: "48px",
+        fill: "yellow",
+      });
+    }
+  }
+
+  collectStar(player, star) {
+    star.destroy();
+    this.score += 10;
+    this.scoreText.setText(`Score : ${this.score}`);
+  }
 }
