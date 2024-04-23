@@ -101,25 +101,24 @@ export default class CollectingStarsScene extends Phaser.Scene {
   }
 
   update() {
+    this.player.setVelocity(0, 200);
+    this.player.anims.play("turn");
     if (this.cursor.left.isDown) {
       //Jika keyboard panah kiri ditekan
-      this.player.setVelocity(-200, 200);
+      this.player.setVelocityX(-200);
       //Kecepatan x : -200
       //Kecepatan y : 200
       //(bergerak ke kiri dan turun kebawah seolah terkena gaya gravitasi)
       this.player.anims.play("left", true);
     } else if (this.cursor.right.isDown) {
-      this.player.setVelocity(200, 200);
+      this.player.setVelocityX(200);
       this.player.anims.play("right", true);
       //Memanggil nama animasi.True artinya animasi forever looping
-    } else {
-      this.player.setVelocity(0, 100);
-      this.player.anims.play("turn");
     }
     /* Kecepatan X = 0
     kecepatan y = -200*/
     if (this.cursor.up.isDown) {
-      this.player.setVelocity(0, -200);
+      this.player.setVelocityY(-200);
       this.player.anims.play("turn");
     }
   }
